@@ -1,0 +1,1 @@
+var e=`/assets/lcnet100_h_e_bifpn_256_fp32-D45j8T1p.onnx`;export{e as default};
