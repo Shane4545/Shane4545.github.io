@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QBT mock — Add Time (test harness)</title>
+    <style>
+      body {
+        font: 15px/1.4 system-ui, sans-serif;
+        max-width: 28rem;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+        color: #102a36;
+      }
+      h1 {
+        font-size: 1.2rem;
+      }
+      label {
+        display: block;
+        margin-top: 0.75rem;
+        font-weight: 600;
+      }
+      input,
+      textarea {
+        width: 100%;
+        margin-top: 0.25rem;
+        padding: 0.5rem;
+        font: inherit;
+      }
+      .actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      button {
+        font: inherit;
+        padding: 0.55rem 0.85rem;
+        cursor: pointer;
+      }
+      .hint {
+        opacity: 0.75;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mock QuickBooks Time — Add Time</h1>
+    <p class="hint">
+      Local harness for CCI fill assist. Looks like a simple Add Time form — not the real Intuit
+      app.
+    </p>
+    <form id="add-time" onsubmit="return false">
+      <label for="job">Job or Customer</label>
+      <input id="job" name="job" type="text" placeholder="(no job)" />
+
+      <label for="start">Start time</label>
+      <input id="start" name="start" type="time" />
+
+      <label for="end">End time</label>
+      <input id="end" name="end" type="time" />
+
+      <label for="notes">Notes</label>
+      <textarea id="notes" name="notes" rows="8" placeholder="NOTES"></textarea>
+
+      <div class="actions">
+        <button type="button" id="run-assist">Run CCI fill assist</button>
+        <button type="button" id="seed-clipboard">Seed sample clipboard</button>
+        <button type="submit" id="save">Save</button>
+      </div>
+    </form>
+    <p id="status" class="hint" role="status"></p>
+
+    <script src="./qbt-fill-assist.js"></script>
+    <script>
+      const SAMPLE = [
+        'CCI Work Reporter → QuickBooks Time fill assist',
+        'Day: Friday, August 21, 2026',
+        'Jobs: 1',
+        '',
+        '=== CCI_QBT_FILL_V1 ===',
+        JSON.stringify(
+          {
+            v: 1,
+            source: 'cci-work-reporter',
+            dayKey: '2026-08-21',
+            dayLabel: 'Friday, August 21, 2026',
+            exportedAt: '2026-08-21T20:00:00.000Z',
+            jobs: [
+              {
+                kind: 'service',
+                kindLabel: '[Service Call]',
+                title: 'SR-1042 · Almonte',
+                jobOrSr: 'SR-1042',
+                site: 'Almonte',
+                contact: 'Jane',
+                po: '99',
+                punches: [
+                  {
+                    startHhmm: '08:30',
+                    stopHhmm: '11:15',
+                    startDisplay: '8:30 AM',
+                    stopDisplay: '11:15 AM',
+                    minutes: 165,
+                    running: false,
+                  },
+                ],
+                travel: '0:40',
+                mileage: '12.0',
+                notes:
+                  'SERVICE CALL REPORT\nSR#: SR-1042\nSite: Almonte\nProblem: beeping\nSolution: reset',
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+        '=== END_CCI_QBT_FILL ===',
+      ].join('\n')
+
+      document.getElementById('seed-clipboard').onclick = async () => {
+        await navigator.clipboard.writeText(SAMPLE)
+        document.getElementById('status').textContent = 'Sample packet on clipboard.'
+      }
+      document.getElementById('run-assist').onclick = async () => {
+        await window.cciQbtFillAssist.runFromClipboard()
+        document.getElementById('status').textContent = 'Assist ran.'
+      }
+      window.__CCI_QBT_SAMPLE__ = SAMPLE
+    </script>
+  </body>
+</html>
