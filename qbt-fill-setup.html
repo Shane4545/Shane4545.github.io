@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QBT fill helper — one-time setup</title>
+    <style>
+      :root {
+        --navy: #102a36;
+        --cream: #f7f4ef;
+        --line: #c5b8a4;
+        --green: #0b3d2e;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font: 16px/1.45 system-ui, sans-serif;
+        color: var(--navy);
+        background: linear-gradient(165deg, #e8f0ec 0%, var(--cream) 45%, #efe8dc 100%);
+        min-height: 100vh;
+        padding: 1.25rem;
+      }
+      main {
+        max-width: 34rem;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 1.45rem;
+        margin: 0 0 0.35rem;
+      }
+      .sub {
+        opacity: 0.8;
+        margin: 0 0 1.25rem;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 6px 20px rgba(16, 42, 54, 0.08);
+      }
+      .card h2 {
+        font-size: 1.05rem;
+        margin: 0 0 0.65rem;
+      }
+      ol {
+        margin: 0;
+        padding-left: 1.2rem;
+      }
+      li {
+        margin-bottom: 0.45rem;
+      }
+      .drag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0.75rem 0;
+        padding: 0.85rem 1.15rem;
+        background: var(--green);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        border: 2px dashed rgba(255, 255, 255, 0.45);
+        cursor: grab;
+      }
+      .drag:active {
+        cursor: grabbing;
+      }
+      .hint {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin: 0.35rem 0 0;
+      }
+      button {
+        font: inherit;
+        padding: 0.65rem 0.9rem;
+        border-radius: 8px;
+        border: 1px solid #b7c4cc;
+        background: #eef3f6;
+        color: var(--navy);
+        cursor: pointer;
+      }
+      button.primary {
+        background: var(--navy);
+        color: #fff;
+        border-color: var(--navy);
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+      }
+      #status {
+        min-height: 1.3em;
+        margin: 0.5rem 0 0;
+        font-size: 0.95rem;
+      }
+      a.back {
+        color: var(--green);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>QuickBooks Time fill helper</h1>
+      <p class="sub">
+        One-time setup on <strong>this computer’s browser</strong> — the same one you use for
+        QuickBooks Time. Grok Bot cannot sign into Intuit; this runs where you already can.
+      </p>
+
+      <section class="card">
+        <h2>1 · Install (desktop Chrome / Edge)</h2>
+        <ol>
+          <li>Show the bookmarks bar (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>).</li>
+          <li>Drag the green button below onto that bar.</li>
+        </ol>
+        <!-- Bookmarklet: floating paste panel on QBT; no login, no auto-submit. -->
+        <a
+          class="drag"
+          id="bookmarklet"
+          href="javascript:(async function(){const START='=== CCI_QBT_FILL_V1 ===',END='=== END_CCI_QBT_FILL ===';function parseClipboard(text){const a=text.indexOf(START),b=text.indexOf(END);if(a<0||b<0||b<=a)return null;try{const data=JSON.parse(text.slice(a+START.length,b).trim());if(!data||data.v!==1||!Array.isArray(data.jobs))return null;return data}catch(e){return null}}function toast(msg){const t=document.createElement('div');t.textContent=msg;Object.assign(t.style,{position:'fixed',bottom:'16px',left:'50%',transform:'translateX(-50%)',zIndex:2147483647,background:'#102a36',color:'#fff',padding:'10px 14px',borderRadius:'8px',font:'14px/1.3 system-ui,sans-serif',maxWidth:'90vw'});document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}async function copyText(value){const v=String(value??'');try{await navigator.clipboard.writeText(v)}catch(e){}const el=document.activeElement;if(el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA')&&!el.disabled&&!el.readOnly){el.focus();try{document.execCommand('selectAll',false);document.execCommand('insertText',false,v)}catch(e){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}toast('Pasted into focused field');return}toast('Copied — tap a QBT field, then paste')}let text='';try{text=await navigator.clipboard.readText()}catch(e){alert('Clipboard blocked. In Work Reporter tap Copy for timesheet fill, then allow clipboard when prompted, or paste the block into this prompt.');text=window.prompt('Paste the CCI_QBT_FILL clipboard text here:','')||''}const payload=parseClipboard(text);if(!payload){alert('No CCI_QBT_FILL_V1 block found. In the PWA tap “Copy for timesheet fill”, then run this again.');return}const old=document.getElementById('cci-qbt-fill-panel');if(old)old.remove();const panel=document.createElement('div');panel.id='cci-qbt-fill-panel';Object.assign(panel.style,{position:'fixed',top:'12px',right:'12px',zIndex:2147483646,width:'min(360px, 92vw)',maxHeight:'80vh',overflow:'auto',background:'#f7f4ef',color:'#102a36',border:'1px solid #c5b8a4',borderRadius:'12px',boxShadow:'0 8px 28px rgba(16,42,54,.25)',font:'13px/1.35 system-ui,sans-serif',padding:'12px'});const head=document.createElement('div');head.innerHTML='<strong>CCI → QBT fill</strong><div style=\"opacity:.75;margin-top:4px\">Paste assist only — you submit. No login.</div>';panel.appendChild(head);const meta=document.createElement('p');meta.textContent=payload.dayLabel+' · '+payload.jobs.length+' job(s)';meta.style.margin='8px 0';panel.appendChild(meta);payload.jobs.forEach((job,ji)=>{const box=document.createElement('div');box.style.cssText='margin:10px 0;padding:8px;border:1px solid #d6cbb8;border-radius:8px;background:#fff';';const title=document.createElement('div');title.style.fontWeight='600';title.textContent=(job.kindLabel||'')+' '+(job.title||job.jobOrSr||'Job '+(ji+1));box.appendChild(title);function addBtn(label,value){if(value==null||String(value).trim()==='')return;const b=document.createElement('button');b.type='button';b.textContent=label;b.title=String(value);Object.assign(b.style,{display:'block',width:'100%',textAlign:'left',marginTop:'6px',padding:'8px 10px',borderRadius:'6px',border:'1px solid #b7c4cc',background:'#eef3f6',color:'#102a36',cursor:'pointer',font:'inherit'});b.addEventListener('click',()=>copyText(value));box.appendChild(b)}addBtn(job.kind==='project'?'Job# · '+job.jobOrSr:'SR# · '+job.jobOrSr,job.jobOrSr);addBtn('Site · '+job.site,job.site);addBtn('Contact · '+job.contact,job.contact);addBtn('PO · '+job.po,job.po);(job.punches||[]).forEach((p,pi)=>{const n=(job.punches.length>1?' '+(pi+1):'');addBtn('Start'+n+' · '+(p.startDisplay||p.startHhmm),p.startHhmm||p.startDisplay);addBtn('Stop'+n+' · '+(p.stopDisplay||p.stopHhmm),p.stopHhmm||p.stopDisplay)});addBtn('Travel · '+job.travel,job.travel);addBtn('Mileage · '+job.mileage,job.mileage);addBtn('Notes (full)',job.notes);panel.appendChild(box)});const close=document.createElement('button');close.type='button';close.textContent='Close';Object.assign(close.style,{marginTop:'8px',width:'100%',padding:'10px',borderRadius:'8px',border:'none',background:'#102a36',color:'#fff',cursor:'pointer',font:'inherit'});close.addEventListener('click',()=>panel.remove());panel.appendChild(close);const note=document.createElement('p');note.style.cssText='margin:8px 0 0;font-size:11px;opacity:.7';note.textContent='You submit the timesheet. Helper never logs in.';panel.appendChild(note);document.body.appendChild(panel)})();"
+          >QBT fill assist</a
+        >
+        <p class="hint">
+          Can’t drag? Use <strong>Copy helper link</strong>, then create a bookmark and paste as the
+          URL (must start with <code>javascript:</code>).
+        </p>
+        <div class="row">
+          <button type="button" class="primary" id="copy-link">Copy helper link</button>
+          <button type="button" id="copy-howto">Copy daily steps</button>
+        </div>
+        <p id="status" role="status"></p>
+      </section>
+
+      <section class="card">
+        <h2>2 · Every day after that</h2>
+        <ol>
+          <li>Work Reporter → <strong>Copy for timesheet fill</strong>.</li>
+          <li>
+            Open QuickBooks Time in <strong>this same browser</strong> (stay logged in as you).
+          </li>
+          <li>Click the <strong>QBT fill assist</strong> bookmark.</li>
+          <li>Tap each value into the matching field. <strong>You</strong> submit.</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>Safari / phone</h2>
+        <p class="hint" style="margin: 0">
+          Bookmark any page → Edit → paste the helper link as the address. On iPhone this is
+          awkward; desktop Chrome/Edge is the reliable path. You can still paste the readable
+          clipboard text into QBT Notes without the helper.
+        </p>
+      </section>
+
+      <p><a class="back" href="./">← Back to Work Reporter</a></p>
+    </main>
+    <script>
+      const link = document.getElementById('bookmarklet')
+      const status = document.getElementById('status')
+      const daily =
+        '1) Work Reporter → Copy for timesheet fill\n' +
+        '2) Open QuickBooks Time (same browser, already logged in)\n' +
+        '3) Click bookmark “QBT fill assist”\n' +
+        '4) Tap values into fields — you submit'
+
+      document.getElementById('copy-link').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(link.getAttribute('href') || '')
+          status.textContent = 'Helper link copied — paste it as a bookmark URL.'
+        } catch {
+          status.textContent = 'Copy failed — long-press the green button and copy link address.'
+        }
+      })
+      document.getElementById('copy-howto').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(daily)
+          status.textContent = 'Daily steps copied.'
+        } catch {
+          status.textContent = 'Copy failed.'
+        }
+      })
+    </script>
+  </body>
+</html>
